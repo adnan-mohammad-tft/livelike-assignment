@@ -179,7 +179,7 @@ jobs:
         with:
           name: allure-history
           path: ./allure-history
-          retention-days: 90
+          retention-days: 2
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v2
