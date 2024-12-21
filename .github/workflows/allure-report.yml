@@ -29,12 +29,18 @@ jobs:
           yarn global add allure-commandline --no-lockfile
           allure --version
 
-      - name: Download existing reports
-        uses: actions/download-artifact@v4
+      - name: Create allure-history directory
+        run: mkdir -p allure-history
+
+      - name: Download existing history
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: allure-report.yml
+          workflow_conclusion: success
           name: allure-history
-          path: ./allure-history
-        continue-on-error: true
+          path: allure-history
+          if_no_artifact_found: ignore
+          search_artifacts: true
 
       - name: Run tests
         run: yarn test
@@ -125,10 +131,10 @@ jobs:
           <body>
             <div class="container">
               <h1>Allure Report History</h1>
-              <ul class="report-list">' > index.html
+              <ul class="report-list">' > allure-history/index.html
           
           # Add historical reports in reverse chronological order
-          for d in $(ls -d allure-history/*/ 2>/dev/null | sort -r); do
+          for d in $(find allure-history -maxdepth 1 -type d -name "[0-9]*" | sort -r); do
             timestamp=$(basename "$d")
             formatted_date=$(date -d "${timestamp:0:8} ${timestamp:8:2}:${timestamp:10:2}:${timestamp:12:2}" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || echo "$timestamp")
             echo "<li class='report-item'>
@@ -137,16 +143,13 @@ jobs:
                 <a href='$timestamp/allure-report/index.html'>View Report</a>
                 <a href='$timestamp/allure-results'>Download Results</a>
               </div>
-            </li>" >> index.html
+            </li>" >> allure-history/index.html
           done
           
           echo '</ul>
             </div>
           </body>
-          </html>' >> index.html
-
-          # Copy index.html to allure-history
-          cp index.html allure-history/
+          </html>' >> allure-history/index.html
 
       - name: Upload history artifact
         uses: actions/upload-artifact@v4
