@@ -16,19 +16,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          yarn install
-          yarn playwright install chromium
-
-      - name: Install Allure
-        run: |
-          yarn global add allure-commandline --no-lockfile
-          allure --version
-
       - name: Create allure-history directory
         run: mkdir -p allure-history
 
@@ -41,6 +28,19 @@ jobs:
           path: allure-history
           if_no_artifact_found: ignore
           search_artifacts: true
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          yarn install
+          yarn playwright install chromium
+
+      - name: Install Allure
+        run: |
+          yarn global add allure-commandline --no-lockfile
+          allure --version
 
       - name: Run tests
         run: yarn test
@@ -156,7 +156,7 @@ jobs:
         with:
           name: allure-history
           path: ./allure-history
-          retention-days: 7
+          # retention-days: 90
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v2
